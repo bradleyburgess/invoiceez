@@ -61,7 +61,7 @@ jobs:
         with:
           # *** UPDATED: Context is now the directory containing the Dockerfile ***
           context: ./backend/
-          file: Dockerfile
+          file: ./backend/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta-backend.outputs.tags }}
@@ -87,7 +87,7 @@ jobs:
         with:
           # *** UPDATED: Context is now the directory containing the Dockerfile ***
           context: ./vue-frontend/
-          file: Dockerfile
+          file: ./vue-frontend/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta-frontend.outputs.tags }}

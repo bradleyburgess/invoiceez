@@ -1,4 +1,4 @@
-invoiceez.yourdomain.tld {
+http://debtop.local {
 	@api {
 		path /api/*
 	}

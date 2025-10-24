@@ -1,7 +1,6 @@
-using System.Text.Json.Serialization;
 using Api.Configuration;
-using Api.Extensions;
 using Api.Extensions.ServiceExtensions;
+using Api.Extensions;
 using Api.Services;
 using Logic.Database;
 using Logic.Models;
@@ -9,8 +8,10 @@ using Logic.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using QuestPDF.Infrastructure;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddEnvironmentVariables();
 
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 

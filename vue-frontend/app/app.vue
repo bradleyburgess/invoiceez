@@ -15,7 +15,19 @@ useHead({
         class: "h-screen min-h-screen",
     },
     link: [{ rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }],
+    meta: [
+        { name: 'description', value: 'Invoiceez - simple invoicing made simple' },
+    ]
 });
+
+useSeoMeta({
+    title: 'Invoiceez',
+    ogTitle: 'Invoiceez',
+    description: 'Simple invoicing made simple',
+    ogDescription: 'Simple invoicing made simple',
+    // ogImage: 'https://invoiceez.bombarde32.net/',
+    twitterCard: 'summary_large_image',
+})
 </script>
 
 <template>

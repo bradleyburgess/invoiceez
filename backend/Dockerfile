@@ -26,6 +26,9 @@ FROM base AS final
 WORKDIR /app
 COPY --from=build /app/publish .
 COPY entrypoint.sh .
-RUN chmod +x entrypoint.sh
+RUN chmod +x entrypoint.sh && \
+    addgroup -g 1000 invoiceez && \
+    adduser -u 1000 -G invoiceez -D invoiceez
+USER invoiceez
 
 ENTRYPOINT ["./entrypoint.sh"]

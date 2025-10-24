@@ -1,0 +1,26 @@
+import type { ClassValue } from "clsx";
+import { clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+import type { UserDto } from "~/api-client";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+export const makePageTitle = (title?: string) =>
+  title ? `${title} | Invoiceez` : "Invoiceez";
+
+export function getUserDisplayName(user: UserDto): string {
+  if (user.firstName && user.lastName)
+    return `${user.firstName} ${user.lastName}`;
+  return user.email ?? "";
+}
+
+export function getUserInitials(user: UserDto): string {
+  const displayName = getUserDisplayName(user);
+  return displayName
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase();
+}

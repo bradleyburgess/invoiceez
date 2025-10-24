@@ -1,0 +1,28 @@
+# Build outputs
+bin/
+obj/
+out/
+*.dll
+*.pdb
+*.log
+
+# User secrets & environment
+.env
+.env.*
+!appsettings.json
+!appsettings.*.json
+
+# OS / IDE junk
+.DS_Store
+Thumbs.db
+.vscode
+.idea
+*.swp
+
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+docker-compose.yml

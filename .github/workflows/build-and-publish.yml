@@ -1,0 +1,94 @@
+name: Build and Push Invoiceez to GHCR
+
+# 1. WHEN TO RUN THE WORKFLOW
+on:
+  push:
+    branches:
+      - 'main'
+    tags:
+      - 'v*.*.*'
+
+# Define variables for the GHCR registry and owner namespace
+env:
+  REGISTRY: ghcr.io
+  IMAGE_OWNER: ${{ github.repository_owner }}
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ----------------------------------------------------
+      # 2. ENABLE MULTI-ARCH BUILD SUPPORT
+      # ----------------------------------------------------
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # ----------------------------------------------------
+      # 3. BUILD AND PUBLISH BACKEND (invoiceez_backend)
+      # ----------------------------------------------------
+      - name: Extract metadata (tags, labels) for Backend
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/invoiceez_backend
+          tags: |
+            type=schedule
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,format=short
+
+      - name: Build and push backend
+        uses: docker/build-push-action@v5
+        with:
+          # *** UPDATED: Context is now the directory containing the Dockerfile ***
+          context: ./backend/
+          file: Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+
+      # ----------------------------------------------------
+      # 4. BUILD AND PUBLISH FRONTEND (invoiceez_frontend)
+      # ----------------------------------------------------
+      - name: Extract metadata (tags, labels) for Frontend
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/invoiceez_frontend
+          tags: |
+            type=schedule
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,format=short
+
+      - name: Build and push frontend
+        uses: docker/build-push-action@v5
+        with:
+          # *** UPDATED: Context is now the directory containing the Dockerfile ***
+          context: ./vue-frontend/
+          file: Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}

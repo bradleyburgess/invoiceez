@@ -1,0 +1,9 @@
+invoiceez.yourdomain.tld {
+	@api {
+		path /api/*
+	}
+
+	reverse_proxy @api invoiceez_backend:5000
+
+	reverse_proxy invoiceez_frontend:80
+}

@@ -1,0 +1,46 @@
+services:
+  frontend:
+    build:
+      context: ./vue-frontend
+      dockerfile: Dockerfile
+      args:
+        NUXT_API_BASE_URL: ${NUXT_API_BASE_URL}
+    container_name: invoiceez_frontend
+    expose:
+      - "80"
+    networks:
+      - invoiceez_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: invoiceez_backend
+    env_file:
+      - ./.env
+    depends_on:
+      - postgres
+    expose:
+      - "5000"
+    networks:
+      - invoiceez_network
+
+  postgres:
+    image: postgres:18-alpine
+    container_name: invoiceez_postgres
+    volumes:
+      - invoiceez_postgres:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    env_file:
+      - ./.env
+    networks:
+      - invoiceez_network
+
+volumes:
+  invoiceez_postgres:
+
+networks:
+  invoiceez_network:
+    external: true
+    name: ${DOCKER_NETWORK}

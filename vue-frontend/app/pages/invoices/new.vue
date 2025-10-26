@@ -76,7 +76,7 @@ async function onSubmit(invoice: InvoiceEditDto) {
         return;
     }
     l.setIdle();
-    navigateTo('/invoices');
+    navigateTo(`/invoices/${response.data?.id ?? ''}`);
     toast.success('Invoice created successfully!');
 }
 

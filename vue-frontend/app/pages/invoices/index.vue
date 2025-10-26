@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { Pencil } from 'lucide-vue-next';
-import { ApiResponseCode, InvoicePaymentStatus, type InvoiceSummaryDto } from '~/api-client';
-import PaidBadge from '~/components/PaidBadge.vue';
-import UnpaidBadge from '~/components/UnpaidBadge.vue';
-import type { DetailItem } from '~/lib/types';
+import type { Row } from '@tanstack/vue-table';
+import { ApiResponseCode, type InvoiceSummaryDto } from '~/api-client';
+import DataTable from '~/components/DataTable.vue';
+import { invoiceTableColumns } from '~/components/invoice/columns';
 import { makePageTitle } from '~/lib/utils';
 
 definePageMeta({ layout: 'logged-in' });
@@ -13,7 +12,6 @@ useHead({
 
 const api = useApi().invoices;
 const l = useLoading();
-const c = useCurrency();
 
 l.setLoading();
 
@@ -24,13 +22,9 @@ if (response.code != ApiResponseCode.Ok) {
 const invoices = response.data?.invoices?.sort(sortInvoiceSummariesByModified);
 l.setIdle();
 
-const makeDetails = (invoice: InvoiceSummaryDto): DetailItem[] => [
-    { heading: "Invoice #", content: invoice.invoiceNumber ?? "" },
-    { heading: "Date", content: displayDate(invoice.invoiceDate) ?? "" },
-    { heading: "Customer", content: invoice.customerName ?? "" },
-    { heading: "Amount", content: c.format(invoice.totalAmount ?? 0, invoice.currency) },
-    { heading: "Status", content: invoice.paymentStatus === InvoicePaymentStatus.Paid ? PaidBadge : UnpaidBadge },
-];
+function rowClickHandler(row: Row<InvoiceSummaryDto>) {
+    navigateTo(`/invoices/${row.original.id}`);
+}
 </script>
 
 <template>
@@ -38,11 +32,9 @@ const makeDetails = (invoice: InvoiceSummaryDto): DetailItem[] => [
     <AppContainer v-else>
         <SpacedColumn>
             <PageTitle>Your Invoices</PageTitle>
-            <div v-if="invoices?.length" class="flex flex-wrap gap-8 items-center justify-center">
-                <EntityCard v-for="invoice in invoices" :key="invoice.id!" :title="invoice.invoiceNumber!"
-                    :button-icon="Pencil" :button-link="`/invoices/${invoice.id}`" button-text="Manage Invoice"
-                    :details="makeDetails(invoice)" />
-                <EntityAddCard name="invoice" link="/invoices/new" />
+            <div v-if="invoices?.length" class="max-w-6xl mx-auto">
+                <DataTable :columns="invoiceTableColumns" :data="invoices ?? []" :row-click-handler="rowClickHandler"
+                    :show-new="true" new-link="/invoices/new" />
             </div>
             <div v-else class="flex flex-col items-center">
                 <p>You do not have any invoices yet.</p>

@@ -1,4 +1,5 @@
 import tailwindcss from "@tailwindcss/vite";
+import { version } from "./package.json";
 
 export default defineNuxtConfig({
   ssr: false,
@@ -28,6 +29,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBaseUrl: process.env.NUXT_API_BASE_URL || "http://localhost:5000",
+      appVersion: version,
     },
     app: {
       head: {

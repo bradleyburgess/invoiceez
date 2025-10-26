@@ -2,7 +2,7 @@
 
 Invoiceez is a web app for easily generating clean, uncluttered invoices.
 
-> *Currenty version: v0.1.0*
+> *Currenty version: v0.1.3*
 
 ## Features
 

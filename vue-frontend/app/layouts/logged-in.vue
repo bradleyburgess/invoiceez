@@ -62,7 +62,7 @@ function onThemeChange() {
                             <DropdownMenuContent align="end" class="w-56">
                                 <DropdownMenuLabel class="font-normal">
                                     <div class="flex flex-col space-y-1">
-                                        <p class="text-sm font-medium leading-none">Hello, {{ displayName }}</p>
+                                        <p class="text-sm font-medium leading-none">Logged in as {{ displayName }}</p>
                                     </div>
                                 </DropdownMenuLabel>
                                 <DropdownMenuSeparator />

@@ -1,14 +1,12 @@
 name: Build and Push Invoiceez to GHCR
 
-# 1. WHEN TO RUN THE WORKFLOW
 on:
   push:
-    branches:
-      - 'main'
+    # branches:
+    #   - 'main'
     tags:
       - 'v*.*.*'
 
-# Define variables for the GHCR registry and owner namespace
 env:
   REGISTRY: ghcr.io
   IMAGE_OWNER: ${{ github.repository_owner }}
@@ -25,9 +23,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ----------------------------------------------------
-      # 2. ENABLE MULTI-ARCH BUILD SUPPORT
-      # ----------------------------------------------------
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -41,9 +36,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # ----------------------------------------------------
-      # 3. BUILD AND PUBLISH BACKEND (invoiceez_backend)
-      # ----------------------------------------------------
       - name: Extract metadata (tags, labels) for Backend
         id: meta-backend
         uses: docker/metadata-action@v5
@@ -59,7 +51,6 @@ jobs:
       - name: Build and push backend
         uses: docker/build-push-action@v5
         with:
-          # *** UPDATED: Context is now the directory containing the Dockerfile ***
           context: ./backend/
           file: ./backend/Dockerfile
           platforms: linux/amd64,linux/arm64
@@ -67,9 +58,6 @@ jobs:
           tags: ${{ steps.meta-backend.outputs.tags }}
           labels: ${{ steps.meta-backend.outputs.labels }}
 
-      # ----------------------------------------------------
-      # 4. BUILD AND PUBLISH FRONTEND (invoiceez_frontend)
-      # ----------------------------------------------------
       - name: Extract metadata (tags, labels) for Frontend
         id: meta-frontend
         uses: docker/metadata-action@v5
@@ -85,7 +73,6 @@ jobs:
       - name: Build and push frontend
         uses: docker/build-push-action@v5
         with:
-          # *** UPDATED: Context is now the directory containing the Dockerfile ***
           context: ./vue-frontend/
           file: ./vue-frontend/Dockerfile
           platforms: linux/amd64,linux/arm64

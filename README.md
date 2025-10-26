@@ -1,8 +1,8 @@
-# Invoiceez
-
 <p align="center">
   <img src="assets/img/invoiceez-logo.png" width="600" />
 </p>
+
+# Invoiceez
 
 Invoiceez is a web app for easily generating clean, uncluttered invoices.
 

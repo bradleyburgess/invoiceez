@@ -20,6 +20,7 @@ Name | Type | Description | Notes
 **businessAddress** | **string** |  | [default to undefined]
 **businessEmail** | **string** |  | [default to undefined]
 **businessPhone** | **string** |  | [default to undefined]
+**businessWebsite** | **string** |  | [optional] [default to undefined]
 **shouldSaveBusiness** | **boolean** |  | [optional] [default to undefined]
 **customerId** | **string** |  | [optional] [default to undefined]
 **customerName** | **string** |  | [default to undefined]
@@ -27,7 +28,6 @@ Name | Type | Description | Notes
 **customerEmail** | **string** |  | [default to undefined]
 **customerPhone** | **string** |  | [default to undefined]
 **shouldSaveCustomer** | **boolean** |  | [optional] [default to undefined]
-**businessWebsite** | **string** |  | [optional] [default to undefined]
 
 ## Example
 
@@ -50,6 +50,7 @@ const instance: InvoiceEditDto = {
     businessAddress,
     businessEmail,
     businessPhone,
+    businessWebsite,
     shouldSaveBusiness,
     customerId,
     customerName,
@@ -57,7 +58,6 @@ const instance: InvoiceEditDto = {
     customerEmail,
     customerPhone,
     shouldSaveCustomer,
-    businessWebsite,
 };
 ```
 

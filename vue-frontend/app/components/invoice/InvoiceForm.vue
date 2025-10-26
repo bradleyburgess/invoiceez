@@ -60,27 +60,13 @@ async function downloadInvoice() {
     URL.revokeObjectURL(url);
 }
 
-const initialValues = {
-    id: invoice.id,
-    invoiceNumber: invoice.invoiceNumber,
+const initialValues = ref<InvoiceEditDto>({
+    ...invoice,
     invoiceDate: invoice.invoiceDate ? invoice.invoiceDate.split("T")[0] : undefined,
-    currency: invoice.currency,
-    paymentInstructions: invoice.paymentInstructions,
-    customerId: invoice.customerId,
-    customerName: invoice.customerName,
-    customerEmail: invoice.customerEmail,
-    customerPhone: invoice.customerPhone,
-    customerAddress: invoice.customerAddress,
-    paymentStatus: invoice.paymentStatus,
-    businessId: invoice.businessId,
-    businessName: invoice.businessName,
-    businessTagline: invoice.businessTagline,
-    businessAddress: invoice.businessAddress,
-    businessEmail: invoice.businessEmail,
-    businessPhone: invoice.businessPhone,
-    businessWebsite: invoice.businessWebsite,
-    shouldUpdateBusiness: !invoice.businessId,
-};
+    shouldSaveBusiness: !invoice.businessId,
+});
+
+watch(() => invoice, (newVal) => initialValues.value = { ...newVal });
 
 const newEntity = !invoice.id;
 
@@ -95,6 +81,12 @@ const handleInvoiceSubmit: SubmissionHandler = async (values) => {
     if (dto.customerId === BLANKUUID) dto.customerId = null;
     if (dto.businessId === BLANKUUID) dto.businessId = null;
     await onSubmit(dto);
+}
+
+async function duplicateInvoice() {
+    l.setLoading();
+    const { data } = await api.invoices.duplicateInvoice(invoice.id!);
+    navigateTo(`/invoices/${data?.data?.id ?? ''}`);
 }
 
 const shouldUpdateBusinessCheckboxDisabled = ref<boolean>(!invoice.businessId);
@@ -314,6 +306,12 @@ async function deleteInvoice() {
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog>
+                    <template v-if="editMode">
+                        <Button type="submit" size="icon-sm" variant="outline" class="rounded-full cursor-pointer"
+                            aria-label="Save Invoice">
+                            <Save />
+                        </Button>
+                    </template>
                     <template v-if="editMode && !newEntity">
                         <Button type="button" size="icon-sm" variant="outline" class="rounded-full cursor-pointer"
                             aria-label="Cancel Edit"
@@ -322,6 +320,10 @@ async function deleteInvoice() {
                         </Button>
                     </template>
                     <template v-if="!newEntity && !editMode">
+                        <Button type="button" size="icon-sm" variant="outline" class="rounded-full cursor-pointer"
+                            aria-label="Duplicate Invoice" @click="duplicateInvoice()">
+                            <Copy />
+                        </Button>
                         <Button type="button" size="icon-sm" variant="outline" class="rounded-full cursor-pointer"
                             aria-label="Edit Invoice" @click="editMode = true">
                             <Pencil />

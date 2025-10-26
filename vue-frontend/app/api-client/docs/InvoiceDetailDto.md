@@ -20,6 +20,7 @@ Name | Type | Description | Notes
 **businessAddress** | **string** |  | [default to undefined]
 **businessEmail** | **string** |  | [default to undefined]
 **businessPhone** | **string** |  | [default to undefined]
+**businessWebsite** | **string** |  | [optional] [default to undefined]
 **customerId** | **string** |  | [optional] [default to undefined]
 **customerName** | **string** |  | [default to undefined]
 **customerAddress** | **string** |  | [default to undefined]
@@ -27,7 +28,6 @@ Name | Type | Description | Notes
 **customerPhone** | **string** |  | [default to undefined]
 **createdAtUtc** | **string** |  | [optional] [default to undefined]
 **modifiedAtUtc** | **string** |  | [optional] [default to undefined]
-**businessWebsite** | **string** |  | [optional] [default to undefined]
 
 ## Example
 
@@ -50,6 +50,7 @@ const instance: InvoiceDetailDto = {
     businessAddress,
     businessEmail,
     businessPhone,
+    businessWebsite,
     customerId,
     customerName,
     customerAddress,
@@ -57,7 +58,6 @@ const instance: InvoiceDetailDto = {
     customerPhone,
     createdAtUtc,
     modifiedAtUtc,
-    businessWebsite,
 };
 ```
 

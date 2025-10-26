@@ -291,6 +291,67 @@ public class InvoicesController(
         return Ok(ApiResponse<EmptyDto>.Ok(message: "Invoice deleted successfully"));
     }
 
+    [HttpPost("duplicate-invoice/{id:guid}")]
+    [SwaggerOperation(
+        OperationId = "DuplicateInvoice",
+        Summary = "Duplicate an invoice"
+    )]
+    public async Task<ActionResult<ApiResponse<InvoiceDetailDto>>> DuplicateInvoice(Guid id)
+    {
+        var userIdResult = userContextService.GetUserId();
+        if (userIdResult == null)
+        {
+            return Unauthorized(ApiResponse<InvoiceDetailDto>.Fail(
+                ApiResponseCode.Unauthorized,
+                "User not authenticated"
+            ));
+        }
+        var invoice = await dbContext.Invoices
+            .Include(i => i.Items)
+            .Include(i => i.Discounts)
+            .FirstOrDefaultAsync(i => i.Id == id && i.UserId == userIdResult.Value);
+
+        if (invoice == null)
+        {
+            return NotFound(ApiResponse<InvoiceDetailDto>.Fail(
+                ApiResponseCode.NotFound,
+                "Invoice not found"
+            ));
+        }
+        var clone = new Invoice
+        {
+            BusinessAddress = invoice.BusinessAddress,
+            BusinessEmail = invoice.BusinessEmail,
+            BusinessId = invoice.BusinessId,
+            BusinessName = invoice.BusinessName,
+            BusinessPhone = invoice.BusinessPhone,
+            BusinessTagline = invoice.BusinessTagline,
+            BusinessWebsite = invoice.BusinessWebsite,
+            CreatedAtUtc = DateTime.UtcNow,
+            Currency = invoice.Currency,
+            CustomerAddress = invoice.CustomerAddress,
+            CustomerEmail = invoice.CustomerEmail,
+            CustomerId = invoice.CustomerId,
+            CustomerName = invoice.CustomerName,
+            CustomerPhone = invoice.CustomerPhone,
+            Discounts = invoice.Discounts.Select(i => new InvoiceDiscount { Amount = i.Amount, Description = i.Description, Type = i.Type }).ToList(),
+            InvoiceDate = invoice.InvoiceDate,
+            InvoiceNumber = invoice.InvoiceNumber + "_COPY",
+            Items = invoice.Items.Select(i => new InvoiceItem { Description = i.Description, Quantity = i.Quantity, Rate = i.Rate }).ToList(),
+            ModifiedAtUtc = DateTime.UtcNow,
+            PaymentInstructions = invoice.PaymentInstructions,
+            PaymentStatus = InvoicePaymentStatus.Unpaid,
+            TotalAmount = invoice.TotalAmount,
+            UserId = invoice.UserId,
+        };
+        dbContext.Invoices.Add(clone);
+        await dbContext.SaveChangesAsync();
+
+        return Ok(ApiResponse<InvoiceDetailDto>.Ok(
+            clone.MapToDetailDto()
+        ));
+    }
+
     [HttpPut("update-status/{id:guid}")]
     [SwaggerOperation(
         OperationId = "UpdateInvoiceStatus",
@@ -333,7 +394,13 @@ public class InvoicesController(
     )]
     public async Task<ActionResult<ApiResponse<string>>> GenerateInvoiceNumber([FromQuery] DateTime InvoiceDate)
     {
+        var userIdResult = userContextService.GetUserId();
+        if (!userIdResult.IsSuccess)
+            return Unauthorized(ApiResponse<bool>.Fail(
+                ApiResponseCode.Unauthorized,
+                "User not authenticated"));
         var numInvoiceOnDate = await dbContext.Invoices
+            .Where(i => i.UserId == userIdResult.Value)
             .Where(i => i.InvoiceNumber.StartsWith("INV"))
             .Where(i => i.InvoiceDate.Date == InvoiceDate.Date)
             .CountAsync();

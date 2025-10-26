@@ -127,6 +127,12 @@ export interface InvoiceDetailDto {
      * @type {string}
      * @memberof InvoiceDetailDto
      */
+    'businessWebsite'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceDetailDto
+     */
     'customerId'?: string | null;
     /**
      * 
@@ -164,12 +170,6 @@ export interface InvoiceDetailDto {
      * @memberof InvoiceDetailDto
      */
     'modifiedAtUtc'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvoiceDetailDto
-     */
-    'businessWebsite'?: string | null;
 }
 
 

@@ -41,7 +41,7 @@ const { data: customersData } = await useAsyncData('customers-list', async () =>
     return customers ?? [];
 });
 
-const initialValues: InvoiceEditDto = { ...invoice };
+const initialValues = ref<InvoiceEditDto>({ ...invoice });
 
 async function onSubmit(invoice: InvoiceEditDto) {
     l.setLoading();
@@ -56,7 +56,7 @@ async function onSubmit(invoice: InvoiceEditDto) {
         return;
     }
     l.setIdle();
-    navigateTo(`/invoices/${response.data?.id ?? ''}`);
+    initialValues.value = { ...response!.data! };
     toast.success('Invoice updated successfully!');
 }
 
@@ -68,7 +68,7 @@ l.setIdle();
         <template v-else>
             <AppContainer>
                 <SpacedColumn>
-                    <PageTitle>{{ invoice.invoiceNumber }}</PageTitle>
+                    <PageTitle>{{ initialValues.invoiceNumber }}</PageTitle>
                     <InvoiceForm :invoice="initialValues" :on-submit="onSubmit" :businesses="businessData ?? []"
                         :customers="customersData ?? []" :generate-invoice-number="generateInvoiceNumber"
                         :validate-invoice-number="validateInvoiceNumber" />

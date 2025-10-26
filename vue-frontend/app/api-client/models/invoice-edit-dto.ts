@@ -124,6 +124,12 @@ export interface InvoiceEditDto {
     'businessPhone': string | null;
     /**
      * 
+     * @type {string}
+     * @memberof InvoiceEditDto
+     */
+    'businessWebsite'?: string | null;
+    /**
+     * 
      * @type {boolean}
      * @memberof InvoiceEditDto
      */
@@ -164,12 +170,6 @@ export interface InvoiceEditDto {
      * @memberof InvoiceEditDto
      */
     'shouldSaveCustomer'?: boolean;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvoiceEditDto
-     */
-    'businessWebsite'?: string | null;
 }
 
 

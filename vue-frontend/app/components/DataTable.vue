@@ -36,8 +36,7 @@ const {
 }>()
 
 const sorting = ref<SortingState>([]);
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const globalFilter = ref<any>([]);
+const globalFilter = ref<string | number | undefined>(undefined);
 
 const table = useVueTable({
   get data() { return data },

@@ -16,7 +16,7 @@ import {
     type InvoiceEditDto,
     type InvoiceItemEditDto,
 } from "~/api-client";
-import { CalendarIcon, Download, Pencil, Plus, RefreshCcw, Save, Trash, Trash2, Undo } from "lucide-vue-next";
+import { CalendarIcon, Copy, Download, Pencil, Plus, RefreshCcw, Save, Trash, Trash2, Undo } from "lucide-vue-next";
 
 const {
     businesses,
@@ -86,7 +86,6 @@ const newEntity = !invoice.id;
 
 const handleInvoiceSubmit: SubmissionHandler = async (values) => {
     const _values = (values as InvoiceEditDto);
-    console.log(_values);
     const dto: InvoiceEditDto = { ..._values };
     dto.invoiceDate = new Date(dto.invoiceDate!).toISOString();
     dto.items = [...itemsRef.value];
@@ -186,6 +185,13 @@ function openItemDialog(index: number | null) {
     itemDialogOpen.value = true;
 }
 
+function duplicateItem(idx: number) {
+    const newItem = { ...itemsRef.value[idx] };
+    newItem.id = null;
+    newItem.description = newItem.description + " (copy)";
+    itemsRef.value.push(newItem);
+}
+
 function removeItem(idx: number) {
     itemsRef.value = itemsRef.value.filter((it, i) => i != idx);
 }
@@ -224,6 +230,13 @@ function openDiscountDialog(index: number | null) {
         editDiscount.value = { id: blankUuid(), description: undefined, amount: undefined, type: undefined };
     }
     discountDialogOpen.value = true;
+}
+
+function duplicateDiscount(idx: number) {
+    const newDiscount = { ...discountsRef.value[idx] };
+    newDiscount.id = null;
+    newDiscount.description = newDiscount.description + " (copy)";
+    discountsRef.value.push(newDiscount);
 }
 
 function removeDiscount(idx: number) {
@@ -669,6 +682,10 @@ async function deleteInvoice() {
                                     class="cursor-pointer rounded-full" @click="openItemDialog(idx)">
                                     <Pencil />
                                 </Button>
+                                <Button size="icon-sm" type="button" variant="ghost" aria-label="Duplicate Item"
+                                    class="cursor-pointer rounded-full" @click="duplicateItem(idx)">
+                                    <Copy />
+                                </Button>
                                 <Button size="icon-sm" type="button" variant="destructive" aria-label="Remove"
                                     class="cursor-pointer rounded-full" @click="removeItem(idx)">
                                     <Trash />
@@ -753,6 +770,10 @@ async function deleteInvoice() {
                                 <Button size="icon-sm" type="button" variant="ghost" aria-label="Edit"
                                     class="cursor-pointer rounded-full" @click="openDiscountDialog(idx)">
                                     <Pencil />
+                                </Button>
+                                <Button size="icon-sm" type="button" variant="ghost" aria-label="Duplicate Discount"
+                                    class="cursor-pointer rounded-full" @click="duplicateDiscount(idx)">
+                                    <Copy />
                                 </Button>
                                 <Button size="icon-sm" type="button" variant="destructive" aria-label="Remove"
                                     class="cursor-pointer rounded-full" @click="removeDiscount(idx)">
@@ -850,20 +871,27 @@ async function deleteInvoice() {
                     </p>
                 </div>
 
-                <div v-if="editMode" class="grid">
+                <ButtonGroup v-if="editMode" class="w-full" orientation="vertical">
                     <Button type="submit" class="cursor-pointer" :disabled="l.isLoading()">
                         <Spinner v-if="l.isLoading()" />
                         <Save v-else />
                         Save
                     </Button>
-                </div>
-                <div v-else class="grid">
+                    <Button type="button" class="cursor-pointer" variant="outline"
+                        @click="() => { resetForm({ values: initialValues }); editMode = false }">
+                        <Undo /> Cancel Edit
+                    </Button>
+                </ButtonGroup>
+                <ButtonGroup v-else class="w-full" orientation="vertical">
                     <Button type="button" class="cursor-pointer" :disabled="l.isLoading()" @click="downloadInvoice">
                         <Spinner v-if="l.isLoading()" />
                         <Download v-else />
                         Download
                     </Button>
-                </div>
+                    <Button type="button" variant="outline" class="cursor-pointer" @click="editMode = true">
+                        <Pencil /> Edit
+                    </Button>
+                </ButtonGroup>
             </CardContent>
         </Card>
     </Form>

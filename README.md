@@ -6,7 +6,7 @@
 
 Invoiceez is a web app for easily generating clean, uncluttered invoices.
 
-> *Currenty version: v0.2.1*
+> *Currenty version: v0.2.2*
 
 ![License: MIT](https://img.shields.io/github/license/bradleyburgess/invoiceez?color=yellow&style=for-the-badge)
 

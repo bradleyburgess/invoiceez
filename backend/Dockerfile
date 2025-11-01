@@ -28,7 +28,10 @@ COPY --from=build /app/publish .
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh && \
     addgroup -g 1000 invoiceez && \
-    adduser -u 1000 -G invoiceez -D invoiceez
+    adduser -u 1000 -G invoiceez -D invoiceez && \
+    apk add --no-cache icu-libs
 USER invoiceez
+
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 
 ENTRYPOINT ["./entrypoint.sh"]

@@ -46,7 +46,11 @@ const l = useLoading();
 const c = useCurrency();
 const api = useApi();
 
+
+const isDownloading = ref<boolean>(false);
+
 async function downloadInvoice() {
+    isDownloading.value = true;
     const response = await api.invoices.generateInvoicePdf(invoice.id!, { responseType: 'blob' });
     const filename = `${businesses.find(b => b.id == invoice.businessId)?.name} - ${invoice.invoiceNumber}.pdf`;
     const blob = new Blob([response.data], { type: 'application/pdf ' });
@@ -58,6 +62,7 @@ async function downloadInvoice() {
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
+    isDownloading.value = false;
 }
 
 const initialValues = ref<InvoiceEditDto>({
@@ -885,10 +890,13 @@ async function deleteInvoice() {
                     </Button>
                 </ButtonGroup>
                 <ButtonGroup v-else class="w-full" orientation="vertical">
-                    <Button type="button" class="cursor-pointer" :disabled="l.isLoading()" @click="downloadInvoice">
-                        <Spinner v-if="l.isLoading()" />
-                        <Download v-else />
-                        Download
+                    <Button type="button" class="cursor-pointer" :disabled="isDownloading" @click="downloadInvoice">
+                        <template v-if="isDownloading">
+                            <Spinner /> Downloading…
+                        </template>
+                        <template v-else>
+                            <Download /> Download
+                        </template>
                     </Button>
                     <Button type="button" variant="outline" class="cursor-pointer" @click="editMode = true">
                         <Pencil /> Edit

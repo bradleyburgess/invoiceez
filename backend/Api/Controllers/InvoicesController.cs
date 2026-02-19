@@ -198,6 +198,13 @@ public class InvoicesController(
     )]
     public async Task<ActionResult<ApiResponse<InvoiceDetailDto>>> UpdateInvoice(Guid id, [FromBody] InvoiceEditDto dto)
     {
+        foreach (var i in dto.Items)
+        {
+            System.Console.WriteLine("-----------------------------------------------");
+            System.Console.WriteLine($"Item: {i.Description}, {i.Quantity}, {i.Rate}");
+            System.Console.WriteLine("-----------------------------------------------");
+        }
+
         var userIdResult = userContextService.GetUserId();
         if (userIdResult == null)
         {

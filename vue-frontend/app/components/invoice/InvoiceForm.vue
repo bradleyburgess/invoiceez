@@ -131,7 +131,7 @@ const formSchema = toTypedSchema(z.object({
 const itemFormSchema = toTypedSchema(z.object({
     id: z.string().uuid().nullable(),
     description: z.string(),
-    quantity: z.number().int().positive("Must be a positive number"),
+    quantity: z.number().multipleOf(0.01).positive("Must be a positive number"),
     rate: currencySchema,
 }));
 

@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 
 namespace Api.Extensions.ServiceExtensions;
 
@@ -19,18 +19,13 @@ public static class SwaggerServiceExtensions
                 In = ParameterLocation.Header,
                 Type = SecuritySchemeType.Http,
                 Scheme = "bearer",
-                Description = "Enter JWT token",
-                Reference = new OpenApiReference
-                {
-                    Id = JwtBearerDefaults.AuthenticationScheme,
-                    Type = ReferenceType.SecurityScheme
-                }
+                Description = "Enter JWT token"
             };
 
-            c.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
-            c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            c.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, jwtSecurityScheme);
+            c.AddSecurityRequirement(doc => new OpenApiSecurityRequirement
             {
-        { jwtSecurityScheme, Array.Empty<string>() }
+                { new OpenApiSecuritySchemeReference(JwtBearerDefaults.AuthenticationScheme, doc), new List<string>() }
             });
         });
         return services;

@@ -10,4 +10,8 @@ done
 
 echo "✅ Database is up."
 echo "🚀 Starting application..."
-exec dotnet Api.dll
+
+dotnet Api.dll 2>&1
+EXIT_CODE=$?
+echo "💥 Application exited with code $EXIT_CODE"
+exit $EXIT_CODE

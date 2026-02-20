@@ -29,7 +29,7 @@ COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh && \
     addgroup -g 1000 invoiceez && \
     adduser -u 1000 -G invoiceez -D invoiceez && \
-    apk add --no-cache icu-data-full icu-libs
+    apk add --no-cache icu-data-full icu-libs netcat-openbsd
 USER invoiceez
 
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false

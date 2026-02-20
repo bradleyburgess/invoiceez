@@ -12,12 +12,20 @@ services:
     container_name: invoiceez_backend
     env_file:
       - ./.env
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - DOTNET_PRINT_TELEMETRY_DETAILS=false
     expose:
       - "5000"
     networks:
       - invoiceez_network
     depends_on:
       - postgres
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   postgres:
     image: postgres:18-alpine

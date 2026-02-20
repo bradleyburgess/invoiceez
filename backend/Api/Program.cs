@@ -67,6 +67,7 @@ try
     app.UseAuthorization();
     app.MapControllers();
 
+    System.Console.WriteLine("Starting API...");
     app.Run("http://0.0.0.0:5000");
 }
 catch (Exception ex)

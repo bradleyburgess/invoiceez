@@ -17,7 +17,8 @@ public class AuthController(
     UserManager<User> userManager,
     SignInManager<User> signInManager,
     ITokenService tokenService,
-    IOptions<AppSettings> options
+    IOptions<AppSettings> options,
+    ILogger<AuthController> logger
 ) : ControllerBase
 {
     [HttpPost("register")]
@@ -27,6 +28,7 @@ public class AuthController(
         var existingUser = await userManager.FindByEmailAsync(dto.Email);
         if (existingUser != null)
         {
+            logger.LogWarning("Registration attempt with already-used email {Email}", dto.Email);
             return BadRequest(ApiResponse<AuthResponseDto>.Fail(
                 ApiResponseCode.BadRequest,
                 "Email is already in use"
@@ -37,9 +39,11 @@ public class AuthController(
 
         if (result.Succeeded)
         {
+            logger.LogInformation("New user registered with email {Email}", dto.Email);
             return await LoginUser(user, "User registration successful!");
         }
 
+        logger.LogWarning("User registration failed for email {Email}: {Errors}", dto.Email, String.Join(", ", result.Errors.Select(x => x.Description)));
         return BadRequest(ApiResponse<AuthResponseDto>.Fail(
             ApiResponseCode.ServerError,
             String.Join(", ", result.Errors.Select(x => x.Description))
@@ -53,6 +57,7 @@ public class AuthController(
         var result = await signInManager.PasswordSignInAsync(dto.Email, dto.Password, false, false);
         if (!result.Succeeded)
         {
+            logger.LogWarning("Login failed for email {Email}", dto.Email);
             return Unauthorized(ApiResponse<AuthResponseDto>.Fail(
                 ApiResponseCode.Unauthorized,
                 "Invalid email or password"
@@ -67,6 +72,7 @@ public class AuthController(
     {
         await signInManager.SignOutAsync();
         DeleteRefreshTokenCookie();
+        logger.LogInformation("User logged out");
         return Ok(ApiResponse<EmptyDto>.Ok(message: "Logged out successfully"));
     }
 
@@ -79,6 +85,7 @@ public class AuthController(
             : dto.RefreshToken;
         if (string.IsNullOrEmpty(refreshToken))
         {
+            logger.LogWarning("Token refresh attempt with missing refresh token");
             return BadRequest(ApiResponse<TokenResponseDto>.Fail(
                 ApiResponseCode.BadRequest,
                 "Refresh token is required"
@@ -87,6 +94,7 @@ public class AuthController(
         var existingToken = await tokenService.GetRefreshTokenAsync(refreshToken);
         if (existingToken == null)
         {
+            logger.LogWarning("Token refresh attempt with invalid or expired token");
             return Unauthorized(ApiResponse<TokenResponseDto>.Fail(
                 ApiResponseCode.Unauthorized,
                 "Invalid or expired refresh token"
@@ -121,6 +129,7 @@ public class AuthController(
         };
 
         SetRefreshTokenCookie(newRefreshToken.Token, newRefreshToken.ExpiresAtUtc);
+        logger.LogInformation("Token refreshed for user {UserId}", user.Id);
         return Ok(ApiResponse<AuthResponseDto>.Ok(data: response, message: "Token refreshed successfully"));
     }
 
@@ -139,6 +148,7 @@ public class AuthController(
         }
         var accessToken = tokenService.GenerateAccessToken(user);
         var refreshToken = await tokenService.CreateRefreshToken(user);
+        logger.LogInformation("User {UserId} authenticated successfully", user.Id);
 
         var response = new AuthResponseDto
         {

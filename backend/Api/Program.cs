@@ -8,51 +8,72 @@ using Logic.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using QuestPDF.Infrastructure;
+using Serilog;
 using System.Text.Json.Serialization;
 
-var builder = WebApplication.CreateBuilder(args);
-builder.Configuration.AddEnvironmentVariables();
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
 
-builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
-
-builder.ConfigureCorsForDevelopment();
-
-builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.ConfigureAppSwagger();
-
-builder.Services.ConfigureInvalidModelStateResponse();
-
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-builder.Services.ConfigureAndAddIdentity<User, IdentityRole<Guid>, AppDbContext>();
-builder.Services.ConfigureAppAuth(builder.Configuration);
-
-QuestPDF.Settings.License = LicenseType.Community;
-
-builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddScoped<IHashingService, Sha256HashingService>();
-builder.Services.AddScoped<IUserContextService, HttpUserContextService>();
-builder.Services.AddScoped<IInvoiceGenerationService, InvoiceGenerationService>();
-builder.Services.AddHttpContextAccessor();
-
-var app = builder.Build();
-
-using var scope = app.Services.CreateScope();
+try
 {
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
+    var builder = WebApplication.CreateBuilder(args);
+    builder.Configuration.AddEnvironmentVariables();
+
+    builder.Host.UseSerilog((context, services, configuration) => configuration
+        .ReadFrom.Configuration(context.Configuration)
+        .ReadFrom.Services(services));
+
+    builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
+
+    builder.ConfigureCorsForDevelopment();
+
+    builder.Services.AddControllers()
+        .AddJsonOptions(options =>
+            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.ConfigureAppSwagger();
+
+    builder.Services.ConfigureInvalidModelStateResponse();
+
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+    builder.Services.ConfigureAndAddIdentity<User, IdentityRole<Guid>, AppDbContext>();
+    builder.Services.ConfigureAppAuth(builder.Configuration);
+
+    QuestPDF.Settings.License = LicenseType.Community;
+
+    builder.Services.AddScoped<ITokenService, TokenService>();
+    builder.Services.AddScoped<IHashingService, Sha256HashingService>();
+    builder.Services.AddScoped<IUserContextService, HttpUserContextService>();
+    builder.Services.AddScoped<IInvoiceGenerationService, InvoiceGenerationService>();
+    builder.Services.AddHttpContextAccessor();
+
+    var app = builder.Build();
+
+    using var scope = app.Services.CreateScope();
+    {
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        db.Database.Migrate();
+    }
+
+    app.AddSwaggerForDevelopment();
+    app.ApplyCorsForDevelopment();
+
+    app.UseSerilogRequestLogging();
+    app.UseAuthentication();
+    app.UseAuthorization();
+    app.MapControllers();
+
+    app.Run("http://0.0.0.0:5000");
 }
-
-app.AddSwaggerForDevelopment();
-app.ApplyCorsForDevelopment();
-
-app.UseAuthentication();
-app.UseAuthorization();
-app.MapControllers();
-
-app.Run("http://0.0.0.0:5000");
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}

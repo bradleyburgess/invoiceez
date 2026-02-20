@@ -19,7 +19,8 @@ namespace Api.Controllers;
 public class AccountController(
     AppDbContext dbContext,
     IUserContextService userContextService,
-    UserManager<User> userManager
+    UserManager<User> userManager,
+    ILogger<AccountController> logger
 ) : ControllerBase
 {
     [HttpGet]
@@ -61,6 +62,7 @@ public class AccountController(
 
         dbContext.Users.Update(user);
         await dbContext.SaveChangesAsync();
+        logger.LogInformation("Account info updated for user {UserId}", user.Id);
 
         return Ok(ApiResponse<UserDto>.Ok(user.MapToDto()));
     }
@@ -80,6 +82,7 @@ public class AccountController(
         var changePasswordResult = await userManager.ChangePasswordAsync(user, dto.CurrentPassword, dto.NewPassword);
         if (!changePasswordResult.Succeeded)
         {
+            logger.LogWarning("Password change failed for user {UserId}", user.Id);
             var errors = new Dictionary<string, string[]>();
             if (changePasswordResult.Errors.Any(e => e.Code == "PasswordMismatch"))
             {
@@ -108,6 +111,7 @@ public class AccountController(
             );
         }
 
+        logger.LogInformation("Password changed for user {UserId}", user.Id);
         return Ok(ApiResponse<object>.Ok("Password changed successfully"));
     }
 }

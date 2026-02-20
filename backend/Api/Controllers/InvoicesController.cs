@@ -20,7 +20,8 @@ namespace Api.Controllers;
 public class InvoicesController(
     AppDbContext dbContext,
     IUserContextService userContextService,
-    IInvoiceGenerationService invoiceGenerationService
+    IInvoiceGenerationService invoiceGenerationService,
+    ILogger<InvoicesController> logger
 )
     : ControllerBase
 {
@@ -186,6 +187,7 @@ public class InvoicesController(
             .Include(i => i.Business)
             .FirstOrDefaultAsync(i => i.Id == newInvoice.Id);
 
+        logger.LogInformation("Invoice {InvoiceId} created for user {UserId}", createdInvoice!.Id, userIdResult.Value);
         return Ok(ApiResponse<InvoiceDetailDto>.Ok(
             createdInvoice!.MapToDetailDto()
         ));
@@ -198,13 +200,6 @@ public class InvoicesController(
     )]
     public async Task<ActionResult<ApiResponse<InvoiceDetailDto>>> UpdateInvoice(Guid id, [FromBody] InvoiceEditDto dto)
     {
-        foreach (var i in dto.Items)
-        {
-            System.Console.WriteLine("-----------------------------------------------");
-            System.Console.WriteLine($"Item: {i.Description}, {i.Quantity}, {i.Rate}");
-            System.Console.WriteLine("-----------------------------------------------");
-        }
-
         var userIdResult = userContextService.GetUserId();
         if (userIdResult == null)
         {
@@ -264,6 +259,7 @@ public class InvoicesController(
         invoice.TotalAmount = invoice.CalculateTotalAmount();
         dbContext.Invoices.Update(invoice);
         await dbContext.SaveChangesAsync();
+        logger.LogInformation("Invoice {InvoiceId} updated", id);
         return Ok(ApiResponse<InvoiceDetailDto>.Ok(
             invoice.MapToDetailDto()
         ));
@@ -295,6 +291,7 @@ public class InvoicesController(
         }
         dbContext.Invoices.Remove(invoice);
         await dbContext.SaveChangesAsync();
+        logger.LogInformation("Invoice {InvoiceId} deleted", id);
         return Ok(ApiResponse<EmptyDto>.Ok(message: "Invoice deleted successfully"));
     }
 
@@ -353,6 +350,7 @@ public class InvoicesController(
         };
         dbContext.Invoices.Add(clone);
         await dbContext.SaveChangesAsync();
+        logger.LogInformation("Invoice {SourceId} duplicated as {NewId}", id, clone.Id);
 
         return Ok(ApiResponse<InvoiceDetailDto>.Ok(
             clone.MapToDetailDto()
@@ -389,6 +387,7 @@ public class InvoicesController(
         invoice.PaymentStatus = status;
         dbContext.Invoices.Update(invoice);
         await dbContext.SaveChangesAsync();
+        logger.LogInformation("Invoice {InvoiceId} payment status updated to {Status}", id, status);
         return Ok(ApiResponse<InvoiceSummaryDto>.Ok(
             invoice.MapToSummaryDto()
         ));
@@ -455,6 +454,7 @@ public class InvoicesController(
         if (invoice == null) return NotFound();
         if (invoice.UserId != userIdResult.Value) return Unauthorized();
         var pdfBytes = invoiceGenerationService.Generate(invoice);
+        logger.LogInformation("PDF generated for invoice {InvoiceId}", invoiceId);
         Response.Headers.Append("Content-Disposition", "inline; filename=Invoice-123.pdf");
         return File(pdfBytes, "application/pdf", $"{invoice.InvoiceNumber}.pdf");
     }

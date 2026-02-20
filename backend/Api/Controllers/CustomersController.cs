@@ -15,7 +15,8 @@ namespace Api.Controllers;
 [Authorize]
 public class CustomersController(
     AppDbContext dbContext,
-    IUserContextService userContextService
+    IUserContextService userContextService,
+    ILogger<CustomersController> logger
 ) : ControllerBase
 {
     [HttpGet]
@@ -74,6 +75,7 @@ public class CustomersController(
         dbContext.Customers.Add(customer);
         await dbContext.SaveChangesAsync();
         var customerDto = customer.MapToDto();
+        logger.LogInformation("Customer {CustomerId} created for user {UserId}", customer.Id, userResult.Value.Id);
         return CreatedAtAction(
             nameof(GetCustomer),
             new { id = customer.Id },
@@ -98,6 +100,7 @@ public class CustomersController(
         }
         dbContext.Customers.Remove(customer);
         await dbContext.SaveChangesAsync();
+        logger.LogInformation("Customer {CustomerId} deleted", id);
         return Ok(ApiResponse<EmptyDto>.Ok(message: "Customer deleted successfully"));
     }
 
@@ -119,6 +122,7 @@ public class CustomersController(
         customer.UpdateFromDto(dto);
         await dbContext.SaveChangesAsync();
         var customerDto = customer.MapToDto();
+        logger.LogInformation("Customer {CustomerId} updated", id);
         return Ok(ApiResponse<CustomerDto>.Ok(customerDto, "Customer updated successfully"));
     }
 }

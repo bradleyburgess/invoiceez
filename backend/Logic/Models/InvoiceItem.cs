@@ -11,4 +11,5 @@ public class InvoiceItem
     public decimal Rate { get; set; }
     public Guid InvoiceId { get; set; }
     public Invoice? Invoice { get; set; }
+    public int Order { get; set; } = 0;
 }

@@ -16,7 +16,8 @@ import {
     type InvoiceEditDto,
     type InvoiceItemEditDto,
 } from "~/api-client";
-import { CalendarIcon, Copy, Download, Pencil, Plus, RefreshCcw, Save, Trash, Trash2, Undo } from "lucide-vue-next";
+import { CalendarIcon, Copy, Download, GripVertical, Pencil, Plus, RefreshCcw, Save, Trash, Trash2, Undo } from "lucide-vue-next";
+import { VueDraggable } from 'vue-draggable-plus';
 
 const {
     businesses,
@@ -79,7 +80,7 @@ const handleInvoiceSubmit: SubmissionHandler = async (values) => {
     const _values = (values as InvoiceEditDto);
     const dto: InvoiceEditDto = { ..._values };
     dto.invoiceDate = new Date(dto.invoiceDate!).toISOString();
-    dto.items = [...itemsRef.value];
+    dto.items = itemsRef.value.map((item, idx) => ({ ...item, order: idx }));
     dto.discounts = [...discountsRef.value];
     dto.shouldSaveCustomer = _values.shouldSaveCustomer ?? false;
     dto.shouldSaveBusiness = _values.shouldSaveBusiness ?? false;
@@ -166,7 +167,8 @@ const editMode = ref<boolean>(newEntity);
 // ====================================================================================================================
 // Invoice Items ======================================================================================================
 // ====================================================================================================================
-const itemsRef = ref<InvoiceItemEditDto[]>([...invoice.items ?? []]);
+const sortedInitialItems = [...(invoice.items ?? [])].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+const itemsRef = ref<InvoiceItemEditDto[]>(sortedInitialItems);
 
 const itemDialogOpen = ref<boolean>(false);
 const editItem = ref<InvoiceItemEditDto | null>(null);
@@ -177,7 +179,7 @@ function openItemDialog(index: number | null) {
         editItemIndex.value = index;
         editItem.value = { ...itemsRef.value[index]! };
     } else {
-        editItem.value = { id: blankUuid(), description: undefined, quantity: undefined, rate: undefined };
+        editItem.value = { id: blankUuid(), description: undefined, quantity: undefined, rate: undefined, order: itemsRef.value.length };
     }
     itemDialogOpen.value = true;
 }
@@ -678,8 +680,14 @@ async function deleteInvoice() {
                 <!-- ============================================================================================= -->
                 <h2 class="text-lg font-bold">Invoice Items</h2>
                 <Dialog v-model:open="itemDialogOpen" :modal="true">
-                    <ItemGroup>
+                    <VueDraggable v-model="itemsRef" :animation="150" handle=".item-drag-handle" :disabled="!editMode"
+                        tag="div" class="group/item-group flex flex-col" role="list">
                         <Item v-for="(it, idx) in itemsRef" :key="`item_${it.id}`">
+                            <button v-if="editMode" type="button"
+                                class="item-drag-handle cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground touch-none shrink-0 -ml-1"
+                                aria-label="Drag to reorder">
+                                <GripVertical class="size-4" />
+                            </button>
                             <ItemContent>
                                 <ItemHeader>{{ it.description }}</ItemHeader>
                                 <ItemDescription>{{ makeItemText(it) }}</ItemDescription>
@@ -699,7 +707,7 @@ async function deleteInvoice() {
                                 </Button>
                             </ItemActions>
                         </Item>
-                    </ItemGroup>
+                    </VueDraggable>
                     <DialogContent :disable-outside-pointer-events="true">
                         <Form v-if="editItem" :initial-values="editItem!" :validation-schema="itemFormSchema"
                             @submit="handleItemDialogSubmit">

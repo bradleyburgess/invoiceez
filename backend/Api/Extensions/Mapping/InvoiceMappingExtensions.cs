@@ -36,7 +36,7 @@ public static class InvoiceMappingExtensions
             InvoiceDate = invoice.InvoiceDate,
             PaymentStatus = invoice.PaymentStatus,
             TotalAmount = invoice.TotalAmount,
-            Items = invoice.Items?.Select(item => item.MapToDto()) ?? [],
+            Items = invoice.Items?.OrderBy(i => i.Order).Select(item => item.MapToDto()) ?? [],
             Discounts = invoice.Discounts?.Select(discount => discount.MapToDto()) ?? [],
             PaymentInstructions = invoice.PaymentInstructions,
             Currency = invoice.Currency,

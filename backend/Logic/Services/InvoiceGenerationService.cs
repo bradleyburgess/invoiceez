@@ -207,7 +207,7 @@ public class InvoiceDocument(Invoice invoice) : IDocument
             });
 
             var lineNumber = 1;
-            foreach (var item in Invoice.Items)
+            foreach (var item in Invoice.Items.OrderBy(i => i.Order))
             {
                 table.Cell().Element(CellStyle).Text(lineNumber.ToString());
                 table.Cell().Element(CellStyle).Text(item.Description);

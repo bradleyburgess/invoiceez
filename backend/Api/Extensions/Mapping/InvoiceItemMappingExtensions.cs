@@ -13,6 +13,8 @@ public static class InvoiceItemMappingExtensions
             Quantity = item.Quantity,
             Rate = item.Rate,
             InvoiceId = item.InvoiceId,
+            Order = item.Order,
+        
         };
 
     public static InvoiceItem MapToEntity(this InvoiceItemEditDto itemDto) =>
@@ -21,6 +23,7 @@ public static class InvoiceItemMappingExtensions
             Description = itemDto.Description,
             Quantity = itemDto.Quantity,
             Rate = itemDto.Rate,
+            Order = itemDto.Order,
         };
 
 }

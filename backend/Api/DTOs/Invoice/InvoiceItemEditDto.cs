@@ -7,4 +7,5 @@ public class InvoiceItemEditDto
     public decimal Quantity { get; set; }
     public decimal Rate { get; set; }
     public Guid? InvoiceId { get; set; }
+    public int Order { get; set; } = 0;
 }

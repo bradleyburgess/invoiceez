@@ -10,6 +10,7 @@ Name | Type | Description | Notes
 **quantity** | **number** |  | [optional] [default to undefined]
 **rate** | **number** |  | [optional] [default to undefined]
 **invoiceId** | **string** |  | [optional] [default to undefined]
+**order** | **number** |  | [optional] [default to undefined]
 
 ## Example
 
@@ -22,6 +23,7 @@ const instance: InvoiceItemEditDto = {
     quantity,
     rate,
     invoiceId,
+    order,
 };
 ```
 

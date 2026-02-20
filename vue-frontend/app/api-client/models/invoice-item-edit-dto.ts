@@ -50,5 +50,11 @@ export interface InvoiceItemEditDto {
      * @memberof InvoiceItemEditDto
      */
     'invoiceId'?: string | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof InvoiceItemEditDto
+     */
+    'order'?: number;
 }
 

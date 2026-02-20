@@ -50,5 +50,11 @@ export interface InvoiceItemDto {
      * @memberof InvoiceItemDto
      */
     'invoiceId'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof InvoiceItemDto
+     */
+    'order'?: number;
 }
 
